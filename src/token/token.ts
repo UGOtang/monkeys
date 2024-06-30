@@ -1,6 +1,4 @@
-// token/token.ts
-
-enum TokenType {
+export enum TokenType {
   ILLEGAL = "ILLEGAL",
   EOF = "EOF",
   IDENT = "IDENT",
@@ -17,7 +15,7 @@ enum TokenType {
   LET = "LET",
 }
 
-class Token {
+export class Token {
   type: TokenType;
   literal: string;
 
