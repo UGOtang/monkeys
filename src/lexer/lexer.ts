@@ -25,7 +25,9 @@ export class Lexer {
   }
 
   public nextToken(): Token {
-    let tok: Token;
+    let tok = new Token(TokenType.ILLEGAL, "");
+
+    this.skipWhitespace();
 
     switch (this.ch) {
       case "=":
@@ -56,12 +58,59 @@ export class Lexer {
         tok = new Token(TokenType.EOF, "");
         break;
       default:
+        if (this.isLetter()) {
+          tok.literal = this.readIdentifier();
+          tok.type = tok.lookupIdentifier(tok.literal);
+          return tok;
+        } else if (this.isDigit()) {
+          tok.literal = this.readNumber();
+          tok.type = TokenType.INT;
+          return tok;
+        } else {
+          tok = new Token(TokenType.ILLEGAL, "");
+        }
         // todo
-        tok = new Token(TokenType.ILLEGAL, "");
+
         break;
     }
 
     this.readChar();
     return tok;
+  }
+
+  isLetter(): boolean {
+    if (!this.ch) return false;
+    return ("a" <= this.ch && this.ch <= "z") ||
+      ("A" <= this.ch && this.ch <= "Z") || this.ch === "_";
+  }
+
+  isDigit(): boolean {
+    if (!this.ch) return false;
+    return "0" <= this.ch && this.ch <= "9";
+  }
+
+  readIdentifier(): string {
+    const prevPosition = this.position;
+    while (this.isLetter()) {
+      this.readChar();
+    }
+    return this.input.slice(prevPosition, this.position);
+  }
+
+  readNumber(): string {
+    const prevPosition = this.position;
+    while (this.isDigit()) {
+      this.readChar();
+    }
+    return this.input.slice(prevPosition, this.position);
+  }
+
+  skipWhitespace() {
+    while (
+      this.ch === " " || this.ch === "\t" || this.ch === "\n" ||
+      this.ch === "\r"
+    ) {
+      this.readChar();
+    }
   }
 }
